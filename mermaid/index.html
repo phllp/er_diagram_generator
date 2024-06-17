@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <title>Auto ER Diagram</title>
+    <link rel="stylesheet" href="reset.css" />
+    <link rel="stylesheet" href="styles.css" />
+    
+  </head>
+  <body>
+    <nav>
+      <div class="logo-container">
+
+        <a href="" class="">Reverse ER</a></nav>
+      </div>
+      <main>
+        <div class="form">
+
+          <div class="form-field">
+            <label for="db-name">Database</label>
+            <input type="text" name="db-name" id="db-name">
+          </div>
+  
+          <div class="form-field">
+            <label for="db-username">Username</label>
+            <input type="text" name="db-username" id="db-username">
+          </div>
+  
+          <div class="form-field">
+            <label for="db-password">Password</label>
+            <input type="text" name="db-password" id="db-password">
+          </div>
+  
+          <div class="form-field">
+            <label for="db-host">Host</label>
+            <input type="text" name="db-host" id="db-host" disabled value="localhost">
+          </div>
+          <div class="actions">
+  
+            <button id="atualizarBtn">Gerar Diagrama</button>
+            <!-- <button id="limparBtn">Limpar</button> -->
+  
+          </div>
+        </div>
+        <!-- <button id="testApi">Testar API</button> -->
+        <div id="mermaidContainer">
+          <pre class="mermaid diagram" id="diagrama">
+            erDiagram
+            CAR ||--o{ NAMED-DRIVER : allows
+                CAR {
+                    string registrationNumber PK
+                    string make
+                    string model
+                    string[] parts
+                }
+                PERSON ||--o{ NAMED-DRIVER : is
+                PERSON {
+                    string driversLicense PK "The license #"
+                    string(99) firstName "Only 99 characters are allowed"
+                    string lastName
+                    string phone UK
+                    int age
+                }
+                NAMED-DRIVER {
+                    string carRegistrationNumber PK, FK
+                    string driverLicence PK, FK
+                }
+                MANUFACTURER only one to zero or more CAR : makes
+            
+            </pre
+          >
+        </div>
+
+      </main>
+      <footer><p>Copyright Felipe Beiger 2024</p></footer>
+    <!-- Incluir o seu script.js -->
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
