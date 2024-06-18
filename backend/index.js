@@ -11,16 +11,9 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
-// Configuração do pool de conexões com PostgreSQL
-const pool = new Pool({
-  user: "admin",
-  host: "localhost",
-  database: "nogueira-db",
-  password: "admin",
-  port: 5432,
-});
+// // Configuração do pool de conexões com PostgreSQL
 
-const getTables = async () => {
+const getTables = async (pool) => {
   const result = await pool.query(tableColumnsSelect);
   const tableData = result.rows;
   if (!tableData || tableData.length == 0) {
@@ -29,7 +22,7 @@ const getTables = async () => {
 
   const tableNames = [...new Set(tableData.map((t) => t.table_name))];
 
-  // Separa os registros de cada tabela em um array distinto
+  //   // Separa os registros de cada tabela em um array distinto
   const filteredTables = tableNames.map((t) =>
     tableData.filter((f) => f.table_name === t)
   );
@@ -48,7 +41,7 @@ const getTables = async () => {
           },
    *    }
    * ]
-   * 
+   *
    */
   const structuredTable = filteredTables.map((t) => {
     const columns = t.map((o) => {
@@ -61,7 +54,7 @@ const getTables = async () => {
     };
   });
 
-  const constraints = await getConstraints();
+  const constraints = await getConstraints(pool);
 
   // Identifica as chaves primárias
   const data_with_pk = structuredTable.map((t) => {
@@ -120,7 +113,7 @@ const getTables = async () => {
           "foreign_column_name": "id"
       },
      */
-const getConstraints = async () => {
+const getConstraints = async (pool) => {
   const result = await pool.query(constraintsSelect);
   const constraints = result.rows;
   console.log(constraints);
@@ -132,10 +125,38 @@ app.get("/", (req, res) => {
   res.send("API está funcionando!");
 });
 
-// Rota para executar uma query
-app.get("/query", async (req, res) => {
+const connectDb = async ({ port, user, database, password }) => {
+  const pool = new Pool({
+    user: user,
+    host: "localhost",
+    database: database,
+    password: password,
+    port: port,
+  });
+
   try {
-    const tables = await getTables();
+    await pool.query("SELECT 1");
+    console.log("DB Connection succeded");
+    return pool;
+  } catch (err) {
+    console.error("Erro ao verificar a saúde do banco de dados:", err);
+    return;
+  }
+};
+
+app.post("/connect-db", async (req, res) => {
+  console.log("BODY", req.body);
+  // const { port, user, password, database } = req.body;
+
+  const pool = await connectDb(req.body);
+
+  if (!pool) {
+    res.status(500).send("Erro ao conectar ao banco de dados");
+    return;
+  }
+
+  try {
+    const tables = await getTables(pool);
     // const constraints = await getConstraints();
     res.json(tables);
   } catch (err) {
@@ -145,5 +166,5 @@ app.get("/query", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}`);
+  console.log(`Servidor rodando na porta ${port}`);
 });

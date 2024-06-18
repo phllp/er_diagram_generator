@@ -1,7 +1,28 @@
 const fetchDatabaseInfo = async () => {
-  const response = await fetch("http://localhost:3000/query");
-  const data = await response.json();
-  return data;
+  const host = document.getElementById("db-host").value;
+  const user = document.getElementById("db-username").value;
+  const password = document.getElementById("db-password").value;
+  const database = document.getElementById("db-database").value;
+  const port = document.getElementById("db-port").value;
+
+  try {
+    const response = await fetch("http://localhost:3000/connect-db", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ port, user, password, database }),
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      return result;
+    } else {
+      console.log("Falha ao buscar os dados do banco de dados: ", result);
+    }
+  } catch (error) {
+    console.error("Erro na requisição: ", error);
+  }
 };
 
 /**
@@ -42,13 +63,15 @@ const formatErDiagram = (dbInfo) => {
   });
   // Adiciona os relacionamentos no diagrama
   relationships.forEach((r) => (diagram += `${r} \n`));
-  console.log(diagram);
+  // console.log(diagram);
   return diagram;
 };
 
 export const generateDiagram = async () => {
-  console.log("reached");
+  // console.log("reached");
   const dbInfo = await fetchDatabaseInfo();
+  console.log(dbInfo);
   const diagram = formatErDiagram(dbInfo);
+  console.log(diagram);
   return diagram;
 };
